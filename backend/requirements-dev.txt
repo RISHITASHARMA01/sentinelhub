@@ -1,0 +1,5 @@
+# Test-only dependencies. Kept separate from requirements.txt so the
+# production Docker image never ships pytest -- smaller image, smaller
+# attack surface, and no risk of test tooling being reachable at runtime.
+-r requirements.txt
+pytest==8.2.2

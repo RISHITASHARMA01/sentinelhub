@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/*
+  SentinelHub is deliberately a single fixed dark theme (no light-mode
+  toggle) -- SOC tooling (Splunk, Grafana, Elastic Security) defaults to
+  dark because analysts stare at these screens for hours, and it's part of
+  what makes this read as a security tool rather than a generic admin
+  template.
+*/
+@theme {
+  --color-bg: #0a0e14;
+  --color-panel: #11161d;
+  --color-panel-raised: #161c25;
+  --color-border: #232b36;
+  --color-text: #e6edf3;
+  --color-text-muted: #8b96a5;
+  --color-accent: #22d3ee;
+  --color-accent-dim: #0e7490;
+
+  --color-sev-critical: #f87171;
+  --color-sev-high: #fb923c;
+  --color-sev-medium: #facc15;
+  --color-sev-low: #60a5fa;
+
+  --color-status-open: #f87171;
+  --color-status-investigating: #facc15;
+  --color-status-resolved: #4ade80;
+  --color-status-false_positive: #8b96a5;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Monospace for anything that's raw log/security data -- reinforces the
+   "terminal/SOC console" feel and makes IPs, hashes, and paths easier to
+   visually scan. */
+.mono {
+  font-family: "SF Mono", "Cascadia Code", Consolas, "Roboto Mono", monospace;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 6px;
+}

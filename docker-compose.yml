@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel
+      POSTGRES_DB: sentinelhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel -d sentinelhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      args:
+        # Local/dev only -- installs pytest so `docker compose exec backend
+        # pytest` works. CI and real deploys build without this arg.
+        INSTALL_DEV: "true"
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://sentinel:sentinel@db:5432/sentinelhub
+      ABUSEIPDB_API_KEY: ${ABUSEIPDB_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./docs:/app/docs:ro
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the JS bundle at build time -- must be a URL the
+        # *browser* can reach, not a container-network hostname like
+        # http://backend:8000. Port 3000 is often taken by other local
+        # projects, so the dashboard is served on 3001 instead.
+        VITE_API_URL: http://localhost:8001
+    restart: unless-stopped
+    ports:
+      - "3001:8080"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
