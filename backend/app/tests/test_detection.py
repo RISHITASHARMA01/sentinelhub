@@ -15,8 +15,16 @@ Run it with:
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.core.database import SessionLocal
+from app.core.database import SessionLocal, Base, engine
 from app.models.models import Alert, LogEvent
+
+# Normally main.py's startup handler creates these tables the moment the
+# app boots -- true for the real backend container, which has always been
+# running for a while by the time you run tests against it. A fresh CI
+# Postgres has never seen that startup event fire, so _reset_tables()'s
+# raw DELETE below would hit tables that don't exist yet. Create them
+# directly rather than relying on app startup having already happened.
+Base.metadata.create_all(bind=engine)
 
 client = TestClient(app)
 
