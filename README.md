@@ -1,13 +1,24 @@
 # SentinelHub — A Self-Built SOC Platform
 
-SentinelHub ingests security-relevant logs (SSH auth logs, web server logs,
-honeypot data), normalizes them into a common schema, and (in later phases)
-runs detection rules mapped to MITRE ATT&CK, enriches findings with threat
-intelligence, and surfaces everything in a live dashboard.
+SentinelHub ingests security-relevant logs (SSH auth logs, web server logs),
+normalizes them into a common schema, runs detection rules mapped to MITRE
+ATT&CK, enriches findings with threat intelligence, and surfaces everything
+in a live dashboard — a small, from-scratch version of what a SOC's SIEM
+tooling actually does.
 
-This is being built in phases, each one runnable and testable on its own.
+Built in phases, each one runnable and testable on its own — see
+[Project status](#project-status).
 
-## Architecture (current: Phase 2)
+[![CI](https://github.com/RISHITASHARMA01/sentinelhub/actions/workflows/ci.yml/badge.svg)](https://github.com/RISHITASHARMA01/sentinelhub/actions/workflows/ci.yml)
+<!-- update the username/repo above if you push this under a different GitHub org/repo name -->
+
+## Screenshots
+
+| Overview | Alerts (expanded) | Logs |
+|---|---|---|
+| ![Overview](docs/screenshots/overview.png) | ![Alerts expanded](docs/screenshots/alerts-expanded.png) | ![Logs](docs/screenshots/logs.png) |
+
+## Architecture
 
 ```
 Raw logs (SSH, nginx, honeypot)
@@ -141,10 +152,32 @@ Both `http://localhost:3001` (Docker) and `http://localhost:5173` (Vite
 dev server) are already allowed in the backend's CORS config
 (`backend/app/main.py`).
 
-Planned next phases:
-- **Phase 5**: Honeypot integration — deploy Cowrie on a VPS, feed real
-  internet attack attempts into the pipeline
-- **Phase 6**: Deployment — Docker Compose → cloud deploy, CI/CD
+Phase 5 (honeypot integration) was an optional stretch goal and was
+skipped for this project — see [Project status](#project-status).
+
+### CI/CD & deployment (Phase 6)
+
+`.github/workflows/ci.yml` runs on every push/PR: backend tests against a
+real Postgres service container, a production Docker build check for the
+backend (proving the shipped image builds cleanly with no dev/test
+dependencies in it), and a frontend build check.
+
+Deployment guide (Render, free tier): see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+#### Production hygiene in the Dockerfiles
+
+- **No dev/test dependencies in the shipped image.** `backend/requirements-dev.txt`
+  (just `pytest`) is only installed when `docker compose` passes
+  `INSTALL_DEV=true` — real deploys and CI's build-check build without it.
+- **Non-root containers.** The backend runs as a created `appuser` (UID
+  1000); the frontend uses `nginxinc/nginx-unprivileged` instead of plain
+  `nginx` so its worker process never runs as root either.
+- **Slim/multi-stage base images.** `python:3.11-slim` for the backend;
+  the frontend is a multi-stage build (Node to compile, nginx-unprivileged
+  alpine to serve) so Node/npm never ship in the final image.
+- **Runtime-configurable port.** The backend's `CMD` reads `$PORT` (with
+  an 8000 fallback for local Docker Compose) since PaaS providers like
+  Render assign it dynamically rather than letting you hardcode 8000.
 
 ## Why this design
 
@@ -156,6 +189,35 @@ Planned next phases:
   `docs/sample_auth.log`) without needing a live server generating logs.
 - **Environment-based config**: DB credentials come from `DATABASE_URL`,
   never hardcoded — a basic but important security hygiene habit.
+
+## How to demo this in an interview
+
+Three talking points that go beyond "it works," in case you get asked
+to go deeper on a design decision:
+
+1. **Why normalize before detecting anything.** SSH logs, web server
+   logs, and (eventually) honeypot JSON all look completely different on
+   the wire. `log_parser.py` converts every source into one `LogEvent`
+   shape up front, so `detection_engine.py` never has to know or care
+   where an event came from — it just asks "did too many `auth_failure`
+   events happen from one IP in 60 seconds?" Add a new log source later
+   and zero detection code changes; you only write a new parser function.
+2. **Why map findings to MITRE ATT&CK instead of inventing my own labels.**
+   MITRE ATT&CK is the industry's shared vocabulary for attack behavior —
+   a real SOC alert that says "T1110" means the same thing everywhere,
+   the same way an HTTP 404 means the same thing everywhere. Using it
+   here is a small thing that signals I know how real security teams
+   communicate findings, not just how to write a regex.
+3. **Rule-based detection vs. ML — and why I started with rules.**
+   Every alert here traces back to one explicit, human-readable condition
+   (`BRUTE_FORCE_THRESHOLD = 5` failed logins in `60` seconds) — you can
+   point at the exact line that fired and explain it to a non-technical
+   stakeholder in one sentence. An ML anomaly detector could catch attack
+   patterns nobody's explicitly coded for, but it trades that explainability
+   away and needs labeled training data and tuning to avoid drowning
+   analysts in false positives. Real SOCs generally start with rules
+   (Sigma rules, Splunk correlation searches) for exactly this reason,
+   and layer ML on top later for the patterns rules can't catch.
 
 ## Running locally
 
@@ -179,15 +241,15 @@ uvicorn app.main:app --reload
 ## Testing ingestion with sample data
 
 ```bash
-curl -X POST http://localhost:8000/ingest/file \
+curl -X POST http://localhost:8001/ingest/file \
   -F "file=@docs/sample_auth.log" \
   -F "source_hint=system"
 ```
 
 Then check it landed:
 ```bash
-curl http://localhost:8000/logs/stats/summary
-curl "http://localhost:8000/logs/?event_type=auth_failure"
+curl http://localhost:8001/logs/stats/summary
+curl "http://localhost:8001/logs/?event_type=auth_failure"
 ```
 
 The sample log contains a simulated brute-force burst (10 failed SSH logins
@@ -244,5 +306,7 @@ ALTER TABLE log_events ADD COLUMN processed_for_detection BOOLEAN NOT NULL DEFAU
 - [x] Phase 2: Detection engine + MITRE ATT&CK mapping
 - [x] Phase 3: Threat intelligence enrichment
 - [x] Phase 4: Dashboard
-- [ ] Phase 5: Honeypot integration
-- [ ] Phase 6: Deployment
+- [ ] Phase 5: Honeypot integration — skipped (optional stretch goal)
+- [x] Phase 6: CI/CD + deployment guide + production hygiene
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for deploying to Render.
