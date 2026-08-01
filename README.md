@@ -1,5 +1,7 @@
 # SentinelHub — A Self-Built SOC Platform
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 SentinelHub ingests security-relevant logs (SSH auth logs, web server logs),
 normalizes them into a common schema, runs detection rules mapped to MITRE
 ATT&CK, enriches findings with threat intelligence, and surfaces everything
