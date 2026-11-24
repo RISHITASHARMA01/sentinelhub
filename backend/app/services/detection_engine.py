@@ -13,6 +13,7 @@ Each rule is mapped to a MITRE ATT&CK technique ID so alerts read like real
 SOC output instead of ad-hoc "something looks wrong" messages.
 """
 
+from app.services.kerberos_detection import detect_kerberos
 from datetime import timedelta
 from collections import defaultdict
 from typing import List
@@ -224,7 +225,12 @@ def detect_off_hours_login(db: Session, events: List[LogEvent]) -> int:
     return created
 
 
-DETECTION_RULES = [detect_brute_force, detect_web_scanning, detect_off_hours_login]
+DETECTION_RULES = [
+    detect_brute_force,
+    detect_web_scanning,
+    detect_off_hours_login,
+    detect_kerberos,
+]
 
 
 def run_detection(db: Session, batch_limit: int = 2000) -> int:
