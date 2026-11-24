@@ -312,3 +312,31 @@ ALTER TABLE log_events ADD COLUMN processed_for_detection BOOLEAN NOT NULL DEFAU
 - [x] Phase 6: CI/CD + deployment guide + production hygiene
 
 See **[DEPLOYMENT.md](DEPLOYMENT.md)** for deploying to Render.
+
+## Advanced Threat Detection Upgrade
+
+SentinelHub extends its original SOC capabilities with:
+
+- Windows Security and Sysmon JSON/JSONL ingestion
+- Kerberos anomaly detection
+- Privilege escalation indicators
+- Persistence and defense-evasion detection
+- Passive network anomaly detection
+- Synthetic security event simulation
+- Host-based event correlation and risk scoring
+- MITRE ATT&CK technique mapping
+- Automated detection validation
+
+### Documentation
+
+- [MITRE ATT&CK Coverage](docs/MITRE_MAPPING.md)
+- [Simulation Lab](docs/SIMULATION.md)
+
+### Run the Simulation
+
+curl -X POST http://localhost:8001/simulation/run
+
+curl -X POST http://localhost:8001/detect/run
+
+This is a defensive security research and educational
+SOC platform. Detection results require analyst validation.

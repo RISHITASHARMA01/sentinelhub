@@ -15,6 +15,10 @@ SOC output instead of ad-hoc "something looks wrong" messages.
 """
 
 from app.services.kerberos_detection import detect_kerberos
+from app.services.privilege_escalation import detect_privilege_escalation
+from app.services.persistence_detection import detect_persistence
+from app.services.c2_detection import detect_c2
+from app.services.event_correlation import detect_correlated_activity
 from datetime import timedelta
 from collections import defaultdict
 from typing import List
@@ -232,6 +236,10 @@ DETECTION_RULES = [
     detect_off_hours_login,
     detect_kerberos,
     detect_lateral_movement,
+    detect_privilege_escalation,
+    detect_persistence,
+    detect_c2,
+    detect_correlated_activity,
 ]
 
 

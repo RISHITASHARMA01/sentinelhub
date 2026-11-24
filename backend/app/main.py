@@ -11,6 +11,7 @@ the difference between prototyping and production practice.
 """
 
 from fastapi import FastAPI
+from app.api import simulation
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
@@ -38,6 +39,7 @@ app.include_router(ingestion.router)
 app.include_router(logs.router)
 app.include_router(detection.router)
 app.include_router(alerts.router)
+app.include_router(simulation.router)
 
 
 @app.on_event("startup")
