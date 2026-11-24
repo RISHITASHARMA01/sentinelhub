@@ -1,3 +1,4 @@
+from app.services.lateral_movement import detect_lateral_movement
 """
 Detection Engine
 ----------------
@@ -230,6 +231,7 @@ DETECTION_RULES = [
     detect_web_scanning,
     detect_off_hours_login,
     detect_kerberos,
+    detect_lateral_movement,
 ]
 
 
