@@ -1,0 +1,6 @@
+{"EventID":4624,"Channel":"Security","Computer":"WORKSTATION-01","TimeCreated":"2026-11-24T10:00:00Z","Synthetic":true,"EventData":{"TargetUserName":"lab_user","IpAddress":"192.0.2.10","LogonType":"10"}}
+{"EventID":4769,"Channel":"Security","Computer":"DC-01","TimeCreated":"2026-11-24T10:01:00Z","Synthetic":true,"EventData":{"TargetUserName":"lab_user","ServiceName":"MSSQLSvc","TicketEncryptionType":"0x17","IpAddress":"192.0.2.10"}}
+{"EventID":4672,"Channel":"Security","Computer":"WORKSTATION-01","TimeCreated":"2026-11-24T10:02:00Z","Synthetic":true,"EventData":{"SubjectUserName":"lab_user","PrivilegeList":"SeDebugPrivilege"}}
+{"EventID":4698,"Channel":"Security","Computer":"WORKSTATION-01","TimeCreated":"2026-11-24T10:03:00Z","Synthetic":true,"EventData":{"SubjectUserName":"lab_user","TaskName":"LabSimulationTask"}}
+{"EventID":3,"Channel":"Microsoft-Windows-Sysmon/Operational","Computer":"WORKSTATION-01","TimeCreated":"2026-11-24T10:04:00Z","Synthetic":true,"EventData":{"SourceIp":"192.0.2.10","DestinationIp":"198.51.100.20","DestinationPort":"443","Image":"C:\\Lab\\simulator.exe"}}
+{"EventID":22,"Channel":"Microsoft-Windows-Sysmon/Operational","Computer":"WORKSTATION-01","TimeCreated":"2026-11-24T10:05:00Z","Synthetic":true,"EventData":{"QueryName":"simulation.example","Image":"C:\\Lab\\simulator.exe"}}

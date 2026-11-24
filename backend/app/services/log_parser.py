@@ -13,6 +13,7 @@ or log it as "unparsed").
 """
 
 import re
+from app.services.windows_parser import parse_windows_log_line
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -118,6 +119,11 @@ def parse_log_line(line: str, source_hint: str = "auto") -> Optional[Dict[str, A
     which log file/stream the line came from rather than guessing, but
     this auto-detection is handy for testing with mixed sample data.
     """
+    if source_hint in ("auto", "windows", "sysmon"):
+        result = parse_windows_log_line(line)
+        if result:
+            return result
+
     if source_hint in ("auto", "system"):
         result = parse_ssh_log_line(line)
         if result:
